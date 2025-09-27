@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Live Captioning",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/realtime_face_caption.py",
+      "console": "integratedTerminal"
+    }
+  ]
+}
