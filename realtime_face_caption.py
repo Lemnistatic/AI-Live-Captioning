@@ -9,32 +9,29 @@ import sys
 from collections import deque
 from datetime import datetime, timedelta
 
-# Whisper
 import whisper
 
-# Globals
 FRAME_WIDTH, FRAME_HEIGHT = 640, 480
 FACE_HOLD_SECONDS = 5.0
 SAMPLERATE = 16000
 BLOCKSIZE = 8000
-GAIN = 4.0  # Increased from 1.5 to 4.0
-DEVICE = None  # Let's auto-select the default input device instead of hardcoding 1
+GAIN = 4.0  
+DEVICE = None  
 
 face_box = None
 last_face_seen = 0
 audio_queue = queue.Queue()
 
-# Delay system
+#delay to make up for the whisper processing time
 DELAY_SECONDS = 5
-frame_buffer = deque(maxlen=DELAY_SECONDS * 30)  # Assuming 30fps
-caption_timeline = deque()  # Store (timestamp, caption) pairs
+frame_buffer = deque(maxlen=DELAY_SECONDS * 30) 
+caption_timeline = deque() 
 
 print("Loading Whisper model...")
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 whisper_model = whisper.load_model("base")
 print("Whisper model loaded successfully!")
 
-# Check audio devices
 print("\nAvailable audio devices:")
 print(sd.query_devices())
 
@@ -42,10 +39,9 @@ def get_best_audio_device():
     devices = sd.query_devices()
     print("\nAvailable Audio Devices:")
     for i, device in enumerate(devices):
-        if device['max_input_channels'] > 0:  # Input device
+        if device['max_input_channels'] > 0:  
             print(f"[{i}] {device['name']}")
     
-    # Try to find a good default
     default_device = sd.query_devices(kind='input')
     device_id = default_device['index']
     print(f"\nSelected device {device_id}: {default_device['name']}")
@@ -55,12 +51,10 @@ def audio_callback(indata, frames, time_info, status):
     if status:
         print(f"Audio callback status: {status}", file=sys.stderr)
     
-    # Debug audio levels
     current_level = np.abs(indata).mean()
     if current_level > 0.001:  # Only print when there's significant audio
         print(f"Audio level: {current_level:.4f}")
     
-    # Apply higher gain
     amplified_audio = indata.copy() * GAIN
     current_time = time.time()
     audio_queue.put((current_time, amplified_audio))
@@ -69,7 +63,7 @@ def audio_thread():
     global DEVICE
     print("Starting audio thread...")
     try:
-        # Auto-select best input device
+
         DEVICE = get_best_audio_device()
         
         with sd.InputStream(
