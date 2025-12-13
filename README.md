@@ -1,4 +1,4 @@
-# AI Live Captioning
+# StreamCC : AI Live Captioning
 
 This project provides real-time face detection and live captioning using your webcam. It combines OpenCV for face detection, Whisper for speech-to-text transcription, and sounddevice for audio input, delivering synchronized captions with a configurable delay for improved accuracy.
 
